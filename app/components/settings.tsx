@@ -321,27 +321,17 @@ export function Settings() {
 
           <ListItem
             title={Locale.Settings.Update.Version(currentVersion ?? "unknown")}
-            subTitle={
-              checkingUpdate
-                ? Locale.Settings.Update.IsChecking
-                : hasNewVersion
-                ? Locale.Settings.Update.FoundUpdate(remoteId ?? "ERROR")
-                : Locale.Settings.Update.IsLatest
-            }
+            // subTitle={
+            //   checkingUpdate
+            //     ? Locale.Settings.Update.IsChecking
+            //     : hasNewVersion
+            //     ? Locale.Settings.Update.FoundUpdate(remoteId ?? "ERROR")
+            //     : Locale.Settings.Update.IsLatest
+            // }
           >
-            {checkingUpdate ? (
-              <div />
-            ) : hasNewVersion ? (
-              <Link href={UPDATE_URL} target="_blank" className="link">
-                {Locale.Settings.Update.GoToUpdate}
-              </Link>
-            ) : (
-              <IconButton
-                icon={<ResetIcon></ResetIcon>}
-                text={Locale.Settings.Update.CheckUpdate}
-                onClick={() => checkUpdate(true)}
-              />
-            )}
+            <div>
+              {Locale.Settings.Update.Version(currentVersion ?? "unknown")}
+            </div>
           </ListItem>
 
           <ListItem title={Locale.Settings.SendKey}>
