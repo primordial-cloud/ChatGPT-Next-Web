@@ -6,8 +6,8 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-  distDir: 'build',
-  assetPrefix: isProd ? 'https://cdn1.posts.chat/gpt' : undefined,
+  // distDir: 'build',
+  assetPrefix: isProd ? 'https://cdn2.posts.chat' : undefined,
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
