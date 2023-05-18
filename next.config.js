@@ -7,7 +7,7 @@ const nextConfig = {
     appDir: true,
   },
   // distDir: 'build',
-  assetPrefix: isProd ? 'https://cdn2.posts.chat' : undefined,
+  // assetPrefix: isProd ? 'https://cdn2.posts.chat' : undefined,
   webpack(config) {
     config.module.rules.push({
       test: /\.svg$/,
