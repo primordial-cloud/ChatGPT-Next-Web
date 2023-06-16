@@ -42,3 +42,6 @@ package-lock.json
 
 # docker-compose env files
 .env
+
+*.key
+*.key.pub
