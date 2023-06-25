@@ -1,4 +1,4 @@
-import { REQUEST_TIMEOUT_MS } from "@/app/constant";
+import { OpenaiPath, REQUEST_TIMEOUT_MS } from "@/app/constant";
 import { useAccessStore, useAppConfig, useChatStore } from "@/app/store";
 
 import { ChatOptions, getHeaders, LLMApi, LLMUsage } from "../api";
@@ -6,14 +6,10 @@ import Locale from "../../locales";
 import {
   EventStreamContentType,
   fetchEventSource,
-} from "@microsoft/fetch-event-source";
+} from "@fortaine/fetch-event-source";
 import { prettyObject } from "@/app/utils/format";
 
 export class ChatGPTApi implements LLMApi {
-  public ChatPath = "v1/chat/completions";
-  public UsagePath = "dashboard/billing/usage";
-  public SubsPath = "dashboard/billing/subscription";
-
   path(path: string): string {
     let openaiUrl = useAccessStore.getState().openaiUrl;
     if (openaiUrl.endsWith("/")) {
@@ -55,7 +51,7 @@ export class ChatGPTApi implements LLMApi {
     options.onController?.(controller);
 
     try {
-      const chatPath = this.path(this.ChatPath);
+      const chatPath = this.path(OpenaiPath.ChatPath);
       const chatPayload = {
         method: "POST",
         body: JSON.stringify(requestPayload),
@@ -99,7 +95,9 @@ export class ChatGPTApi implements LLMApi {
 
             if (
               !res.ok ||
-              res.headers.get("content-type") !== EventStreamContentType ||
+              !res.headers
+                .get("content-type")
+                ?.startsWith(EventStreamContentType) ||
               res.status !== 200
             ) {
               const responseTexts = [responseText];
@@ -143,6 +141,7 @@ export class ChatGPTApi implements LLMApi {
           },
           onerror(e) {
             options.onError?.(e);
+            throw e;
           },
           openWhenHidden: true,
         });
@@ -174,21 +173,25 @@ export class ChatGPTApi implements LLMApi {
     const [used, subs] = await Promise.all([
       fetch(
         this.path(
-          `${this.UsagePath}?start_date=${startDate}&end_date=${endDate}`,
+          `${OpenaiPath.UsagePath}?start_date=${startDate}&end_date=${endDate}`,
         ),
         {
           method: "GET",
           headers: getHeaders(),
         },
       ),
-      fetch(this.path(this.SubsPath), {
+      fetch(this.path(OpenaiPath.SubsPath), {
         method: "GET",
         headers: getHeaders(),
       }),
     ]);
 
-    if (!used.ok || !subs.ok || used.status === 401) {
+    if (used.status === 401) {
       throw new Error(Locale.Error.Unauthorized);
+    }
+
+    if (!used.ok || !subs.ok) {
+      throw new Error("Failed to query usage from openai");
     }
 
     const response = (await used.json()) as {
@@ -221,3 +224,4 @@ export class ChatGPTApi implements LLMApi {
     } as LLMUsage;
   }
 }
+export { OpenaiPath };
